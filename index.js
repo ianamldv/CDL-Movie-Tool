@@ -1,6 +1,9 @@
 const axios = require('axios');
 const config = require('./config.json');
 
+const fs = require('fs');
+const FAVORITES_FILE = './favourite.json';
+
 /*
 This funtion runs the CDL Movie Tool
 Usages: 
@@ -19,12 +22,22 @@ async function run() {
         node index.js search "Cars" -> shows all movies found with this input
         node index.js info "The Vampire Diaries" -> for detailed information about movie
         node index.js info tt1375666 -> for detailed information about movie by IMDB Code
+        node index.js add "Inception" -> adds a movie to favourites file by name
+        node index.js add tt1375666 -> adds a movie to favourites file by IMDB Code
+        node index.js info "Inception" -> checks if a movie is in favourites by name or id
         `);
     }else if (command === 'search') {
-        searchMovies(query);
+        await searchMovies(query);
     } else if (command === 'info') {
-        getMovieDetails(query);
-    }};
+        await getMovieDetails(query);
+    } else if (command === 'add') {
+        await addToFavourite(query);
+    } else if (command ==='remove') {
+        await removeFromFavorites(query);
+    } else if (command === 'info') {
+        await isFavorite (query);
+    }
+};
 
 //use this to see how the data from API looks
 async function seeData(name) {
@@ -47,6 +60,7 @@ async function fetchMovieData(query) {
 
     return{
         title: data.Title,
+        id: data.imdbID,
         year: data.Year,
         runtime: data.Runtime,
         genre: data.Genre,
@@ -94,8 +108,11 @@ async function getMovieDetails(idOrTitle) {
         ? movie.plot.slice(0, 100) + "..."
         : movie.plot
 
+    const favoriteTitle = await isFavorite(movie.id);
+    const favoriteStar = favoriteTitle ? '⭐' : '';
+
     console.log(`
-        🎬 ${movie.title.toUpperCase()} (${movie.year})
+        🎬 ${favoriteStar} ${movie.title.toUpperCase()} (${movie.year})
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         🎭 Director: ${movie.director}
@@ -112,4 +129,97 @@ async function getMovieDetails(idOrTitle) {
         `)
 };
 
+
+//check that the file exist
+if (!fs.existsSync(FAVORITES_FILE)) {
+  fs.writeFileSync(FAVORITES_FILE, JSON.stringify({ movies: [] }, null, 2));
+}
+
+//loads the info from the favourites file
+async function loadFavourites() {
+    if (!fs.existsSync(FAVORITES_FILE)) {
+        fs.writeFileSync(FAVORITES_FILE, JSON.stringify({ movies: [] }, null, 2));
+    }
+
+    const data = fs.readFileSync(FAVORITES_FILE, 'utf8');
+    const favorites = JSON.parse(data);
+
+    if (!favorites.movies) {
+        favorites.movies = [];
+    }
+    
+    return favorites;
+}
+
+//saves the info to the favourites file
+async function saveFavourites(favorites) {
+    fs.writeFileSync(FAVORITES_FILE, JSON.stringify(favorites, null, 2));
+}
+
+//adds a movie to the favourites file
+async function addToFavourite(query) {
+
+    const favorites = await loadFavourites();
+
+    const movie = await fetchMovieData(query);
+    if (!movie) {
+        console.log('Movie not found!');
+        return;
+    }
+
+    const movieExists = favorites.movies.some(
+        m => m.id === movie.id || m.title === movie.title 
+    );
+
+    if (movieExists) {
+        console.log(`${movie.title} already exists in favourites`);
+        return;
+    }
+
+    favorites.movies.push({
+        id: movie.id,
+        title: movie.title,
+        year: movie.year,
+        rating: movie.rating,
+        addedAt: new Date().toISOString()
+    });
+    saveFavourites(favorites);
+
+    console.log(`${movie.title} was succesfuly added to favourites`);
+};
+
+//removes a movie from favourites by name or id
+async function removeFromFavorites(identifier) {
+    const favorites = await loadFavourites();
+
+    const isID = identifier.startsWith('tt');
+    const index = favorites.movies.findIndex(movie => 
+        isID? movie.isID === identifier : movie.title.toLowerCase() === identifier.toLowerCase()
+    );
+
+    if (index === -1) {
+        console.log(`Movie with ID ${identifier} not found in favourites.`);
+        return;
+    }
+
+    const removed = favorites.movies.splice(index, 1)[0];
+    saveFavourites(favorites);
+
+    console.log(`${removed.title} was removed from favourites.`);
+};
+
+//checks if a movie is in favourites by name or id
+async function isFavorite(identifier) {
+    const favorites = await loadFavourites();
+
+    const isID = identifier.startsWith('tt');
+    const movie = favorites.movies.find(movie => 
+        isID? movie.id === identifier : movie.title.toLowerCase() === identifier.toLowerCase()
+    );
+
+    return movie ? movie.title : null;
+};
+
 run();
+
+
