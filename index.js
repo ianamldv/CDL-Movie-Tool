@@ -6,7 +6,7 @@ const FAVORITES_FILE = './favourite.json';
 
 
 // This funtion runs the CDL Movie Tool
-async function run() {
+async function main() {
     const args  = process.argv.slice(2);
     const command = args[0];
     const searchTerm = args[1];
@@ -424,6 +424,6 @@ async function randomFavoriteMovie() {
     console.log(`🎲 Random Favorite Movie: ${randomMovie.title} (${randomMovie.year}) - Rating: ${randomMovie.rating}/10`);
 }
 
-run();
+main();
 
 
