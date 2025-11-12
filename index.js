@@ -4,13 +4,8 @@ const config = require('./config.json');
 const fs = require('fs');
 const FAVORITES_FILE = './favourite.json';
 
-/*
-This funtion runs the CDL Movie Tool
-Usages: 
-    *node index.js search "Cars" -> shows all movies found with this input
-    *node index.js info "The Vampire Diaries" -> for detailed information about movie
-    *node index.js info tt1375666 -> for detailed information about movie by IMDB Code
-*/
+
+// This funtion runs the CDL Movie Tool
 async function run() {
     const args  = process.argv.slice(2);
     const command = args[0];
@@ -278,6 +273,7 @@ async function isFavorite(identifier) {
     return movie ? movie.title : null;
 };
 
+//shows all favourite movies
 async function showfavorites() {
     const favorites = await loadFavourites();
 
@@ -291,6 +287,7 @@ async function showfavorites() {
     }); 
 }
 
+//shows top 5 favourite movies by rating
 async function showTopFavorites() {
     const favorites = await loadFavourites();
 
@@ -307,6 +304,7 @@ async function showTopFavorites() {
     });
 }
 
+//shows statistics about favourite movies
 async function favouriteStatistics() {
     const favorites = await loadFavourites();
 
@@ -361,6 +359,7 @@ async function favouriteStatistics() {
     `);
 };
 
+//exports favourite movies to a CSV file
 async function exportFavoritesToCSV(filename) {
     const favorites = await loadFavourites();
 
@@ -386,6 +385,7 @@ async function exportFavoritesToCSV(filename) {
     console.log(`Favorites exported to ${filename}`);
 };
 
+//compares side by side two movies by name or id
 async function compareMovies(idOrTitle1, idOrTitle2) {
     const movie1 = await fetchMovieData(idOrTitle1);
     const movie2 = await fetchMovieData(idOrTitle2);
@@ -409,6 +409,7 @@ async function compareMovies(idOrTitle1, idOrTitle2) {
     `);
 };
 
+//shows a random movie from favourites
 async function randomFavoriteMovie() {
     const favorites = await loadFavourites();
 
