@@ -34,15 +34,23 @@ cd <repository_folder>
 npm install
 ```
 
-3. Initialize the favorites file
+3. ⚙️ Initial Setup
 
-Make sure your favourites.json file exists and has the following structure:
+Before using the tool for the first time, you need to configure your OMDb API key.
 
-```json
-{
-    "movies" : []
-}
+You will be prompted to enter your OMDB API key, 
+which you have to create from here: http://www.omdbapi.com/apikey.aspx
+
+Run the setup command:
+
+```bash
+node index.js setup
 ```
+
+This command will:
+
+Create a config.json file with your API key and base URL
+Create an empty favourite.json file to store your favorite movies
 
 ## Camands to use
 

@@ -1,9 +1,31 @@
-const axios = require('axios');
-const config = require('./config.json');
-
 const fs = require('fs');
-const FAVORITES_FILE = './favourite.json';
+const axios = require('axios');
 
+const FAVORITES_FILE = './favourite.json';
+const CONFIG_FILE = './config.json';
+
+async function setupConfig() {
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    readline.question('Enter your OMDb API key: ', (apiKey) => {
+        const configData = {
+            baseUrl: "http://www.omdbapi.com/",
+            apiKey: apiKey
+        };
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify(configData, null, 2));
+        console.log('✅ config.json created successfully!');
+        readline.close();
+
+        // Create favourites file if missing
+        if (!fs.existsSync(FAVORITES_FILE)) {
+            fs.writeFileSync(FAVORITES_FILE, JSON.stringify({ movies: [] }, null, 2));
+            console.log('✅ favourite.json created successfully!');
+        }
+    });
+}
 
 // This funtion runs the CDL Movie Tool
 async function main() {
@@ -36,7 +58,10 @@ async function main() {
         node index.js compare "Inception" "The Dark Knight" -> compares two movies by name or id
         node index.js random -> shows a random movie from favourites
         `);
-    }else if (command === 'search') {
+    } if (command === 'setup') {
+        await setupConfig();
+        return;
+    } else if (command === 'search') {
         if (!searchTerm) {
             console.log('Please provide a search term');
             return;

@@ -1,4 +1,4 @@
 {
-  "apiKey": "ecd547da",
-  "baseUrl": "http://www.omdbapi.com/"
+  "baseUrl": "http://www.omdbapi.com/",
+  "apiKey": "ecd547da"
 }

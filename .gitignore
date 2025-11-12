@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 package.json
 favorites.json
+config.json
